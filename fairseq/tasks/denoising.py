@@ -67,8 +67,8 @@ class DenoisingConfig(FairseqDataclass):
         },
     )
     replace_length: int = field(
-        default=0,
-        metadata={"help": "TODO, should only allow -1, 0 and 1"},
+        default=1,
+        metadata={"help": "when masking N tokens, replace with 0, 1, or N tokens (use -1 for N)"},
     )
     mask: float = field(
         default=0.0,
@@ -94,18 +94,18 @@ class DenoisingConfig(FairseqDataclass):
         default=3.0,
         metadata={"help": "randomly shuffle sentences for this proportion of inputs"},
     )
-    shuffle_instance: float = field(
-        default=0.0,
-        metadata={"help": "shuffle this proportion of sentences in all inputs"},
+    shuffle_instance: Optional[bool] = field(
+        default=None,
+        metadata={"help": "shuffle the samples"},
     )
     mask_length: MASK_LENGTH_CHOICES = field(
         default="subword",
         metadata={"help": "mask length to choose"},
     )
-    permute_sentences: int = field(
-        default=-1,
+    permute_sentences: float = field(
+        default=1.0,
         metadata={
-            "help": "when masking N tokens, replace with 0, 1, or N tokens (use -1 for N)"
+            "help": "shuffle this proportion of sentences in all inputs"
         },
     )
     seed: int = II("common.seed")
@@ -209,7 +209,6 @@ class DenoisingTask(FairseqTask):
 
     def load_dataset(self, split, epoch=1, combine=False, **kwargs):
         """Load a given dataset split.
-
         Args:
             split (str): name of the split (e.g., train, valid, test)
         """
